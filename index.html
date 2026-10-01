@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartTraffic AI – Real-Time Traffic Congestion Prediction & Dynamic Signal Control System</title>
+  <meta name="description" content="AI-driven smart city traffic congestion prediction, spatial-temporal graph modeling, dynamic signal timing optimization, and live incident management.">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">🚦</div>
+      <div>
+        <h1 class="brand-title">SmartTraffic AI</h1>
+        <span class="brand-tag">Autonomous Urban Mobility Platform</span>
+      </div>
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="dashboard-tab">
+        <span>🏙️</span> Live Network Sim
+      </button>
+      <button class="tab-btn" data-tab="prediction-tab">
+        <span>🔮</span> AI Predictor & Forecast
+      </button>
+      <button class="tab-btn" data-tab="signals-tab">
+        <span>🚥</span> Adaptive Signal Control
+      </button>
+      <button class="tab-btn" data-tab="analytics-tab">
+        <span>📊</span> Analytics & Telemetry
+      </button>
+    </nav>
+
+    <div class="header-status">
+      <div class="live-badge">
+        <span class="pulse-dot"></span> LIVE SIMULATION ACTIVE
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- TAB 1: DASHBOARD & LIVE CANVAS SIMULATION -->
+    <section id="dashboard-tab" class="tab-content active">
+      <div class="dashboard-grid">
+        
+        <!-- Left Column: Simulation Controls & Weather Scenarios -->
+        <aside class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>⚙️</span> Simulation Controls</h2>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label">
+              <span>Time of Day (Hour)</span>
+              <span id="lblTimeOfDay" class="control-label-value">17:00 (Peak Rush)</span>
+            </div>
+            <input type="range" id="sliderTimeOfDay" class="custom-range" min="0" max="23" value="17">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Weather Condition</label>
+            <select id="selWeather" class="select-input">
+              <option value="clear">☀️ Clear / Dry</option>
+              <option value="rain">🌧️ Heavy Rain (+35% delay)</option>
+              <option value="fog">🌫️ Dense Fog (+45% delay)</option>
+              <option value="snow">❄️ Snow / Ice (+85% delay)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Special Metro Event</label>
+            <select id="selEvent" class="select-input">
+              <option value="none">None</option>
+              <option value="stadium">🏟️ Stadium Football Match (+55%)</option>
+              <option value="concert">🎵 Arena Music Concert (+40%)</option>
+              <option value="protest">📢 Downtown Rally (+75%)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <button id="btnToggleRoadwork" class="btn-secondary" style="margin-bottom: 8px;">
+              🚧 Toggle Roadwork Construction
+            </button>
+            <button id="btnClearIncidents" class="btn-secondary">
+              🧹 Clear All Road Accidents
+            </button>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--bg-card-border); margin: 18px 0;">
+
+          <div class="panel-header" style="margin-bottom: 12px;">
+            <h3 class="panel-title" style="font-size: 13px;"><span>⚡</span> Preset City Scenarios</h3>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-secondary" onclick="app.loadPreset('morning')">🌅 Morning Commute Peak (08:00)</button>
+            <button class="btn-secondary" onclick="app.loadPreset('evening')">🌆 Evening Exodus Rush (17:30)</button>
+            <button class="btn-secondary" onclick="app.loadPreset('storm')">🌩️ Severe Storm & Gridlock</button>
+          </div>
+        </aside>
+
+        <!-- Center Column: Interactive Canvas Traffic Grid -->
+        <div class="sim-container">
+          <div class="sim-toolbar">
+            <div class="sim-controls-group">
+              <button id="btnPlayPause" class="icon-btn active" title="Pause / Play">⏸️</button>
+              <button id="btnSpeed1" class="icon-btn active" onclick="sim.setSpeed(1.0)">1x</button>
+              <button id="btnSpeed2" class="icon-btn" onclick="sim.setSpeed(2.5)">2.5x</button>
+              <button id="btnSpeed5" class="icon-btn" onclick="sim.setSpeed(5.0)">5x</button>
+            </div>
+            <div class="sim-controls-group">
+              <span style="font-size: 11px; color: var(--text-muted); padding: 4px 8px; font-weight: 600;">
+                💡 Tip: Click any road segment to simulate a live accident!
+              </span>
+            </div>
+          </div>
+
+          <canvas id="simCanvas"></canvas>
+
+          <div class="map-overlay-info">
+            <div class="overlay-stat">Active Vehicles: <span id="statActiveVehicles">64</span></div>
+            <div class="overlay-stat">Avg Speed: <span id="statAvgSpeed">38 mph</span></div>
+            <div class="overlay-stat">Incidents: <span id="statActiveIncidents" style="color: var(--accent-danger)">0</span></div>
+          </div>
+        </div>
+
+        <!-- Right Column: Real-time Corridor Congestion Feed & AI Insights -->
+        <aside class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>📡</span> Corridor Status</h2>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-title">Network Index</div>
+              <div class="metric-value" id="valNetworkIndex">42%</div>
+              <div class="metric-trend trend-up">▲ Moderate Flow</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Delay Reduction</div>
+              <div class="metric-value" id="valDelayReduction" style="color: var(--accent-emerald)">-38.4%</div>
+              <div class="metric-trend trend-down">▼ AI Signal Mode</div>
+            </div>
+          </div>
+
+          <div class="panel-header" style="margin-top: 10px; margin-bottom: 12px;">
+            <h3 class="panel-title" style="font-size: 13px;">Critical Road Arterials</h3>
+          </div>
+
+          <div id="corridorListContainer" class="corridor-list">
+            <!-- Dynamic corridor cards populated via JS -->
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: AI PREDICTOR & FORECAST WORKSPACE -->
+    <section id="prediction-tab" class="tab-content">
+      <div class="dashboard-grid" style="grid-template-columns: 340px 1fr;">
+        
+        <aside class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🔮</span> Predictive AI Parameters</h2>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Target Corridor</label>
+            <select id="selPredictCorridor" class="select-input">
+              <option value="C1">Downtown Metro Hub (C1)</option>
+              <option value="C2">Tech Ridge Expressway (C2)</option>
+              <option value="C3">Bay Bridge Connector (C3)</option>
+              <option value="C4">Airport Central Parkway (C4)</option>
+            </select>
+          </div>
+
+          <div class="horizon-picker">
+            <button class="horizon-btn active">15 Mins</button>
+            <button class="horizon-btn">1 Hour</button>
+            <button class="horizon-btn">3 Hours</button>
+            <button class="horizon-btn">24 Hours</button>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label">
+              <span>Simulated Incident Severity</span>
+              <span id="lblIncidentSev" class="control-label-value">Level 0 (None)</span>
+            </div>
+            <input type="range" id="sliderIncidentSev" class="custom-range" min="0" max="4" value="0">
+          </div>
+
+          <button id="btnRunPrediction" class="btn-primary" style="margin-top: 14px;">
+            <span>🚀</span> Compute Spatial-Temporal AI Forecast
+          </button>
+        </aside>
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>📈</span> 24-Hour Predicted Congestion & Flow Profile</h2>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="timelineCanvas"></canvas>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Predicted Bottleneck Risk Ranking</h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--bg-card-border); color: var(--text-muted); text-align: left;">
+                  <th style="padding: 8px;">Corridor</th>
+                  <th style="padding: 8px;">Speed Limit</th>
+                  <th style="padding: 8px;">Predicted Speed</th>
+                  <th style="padding: 8px;">Queue Length</th>
+                  <th style="padding: 8px;">Risk Index</th>
+                </tr>
+              </thead>
+              <tbody id="tblPredictionBody">
+                <!-- Dynamic prediction table rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 3: ADAPTIVE SIGNAL CONTROL -->
+    <section id="signals-tab" class="tab-content">
+      <div class="dashboard-grid" style="grid-template-columns: 400px 1fr;">
+
+        <aside class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🚥</span> Controller Configuration</h2>
+          </div>
+
+          <label class="control-label" style="margin-bottom: 10px;">Optimization Algorithm Mode</label>
+          <div class="signal-mode-switch">
+            <button class="mode-btn" onclick="app.setSignalMode('fixed')">Fixed Schedule</button>
+            <button class="mode-btn" onclick="app.setSignalMode('actuated')">Actuated Sensor</button>
+            <button class="mode-btn active" onclick="app.setSignalMode('ai')">AI Adaptive</button>
+          </div>
+
+          <div class="metrics-grid" style="margin-top: 16px;">
+            <div class="metric-card">
+              <div class="metric-title">Active Signal State</div>
+              <div class="metric-value" id="valSignalState" style="color: var(--accent-emerald); font-size: 16px;">NS_GREEN</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Time Remaining</div>
+              <div class="metric-value" id="valSignalTimer" style="color: var(--accent-cyan);">18s</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <button id="btnEmergencyWave" class="btn-primary btn-danger">
+              <span>🚨</span> Trigger Emergency Vehicle Green Wave Priority
+            </button>
+          </div>
+        </aside>
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>⚖️</span> Fixed Schedule vs AI Adaptive Delay Comparison</h2>
+          </div>
+
+          <div class="chart-box">
+            <canvas id="delayCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: ANALYTICS & TELEMETRY -->
+    <section id="analytics-tab" class="tab-content">
+      <div class="analytics-grid">
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🌱</span> Sustainability & Environmental Impact</h2>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-title">CO2 Emissions Prevented</div>
+              <div class="metric-value" id="valCo2Saved" style="color: var(--accent-emerald)">142.5 <span class="metric-unit">kg</span></div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Fuel Waste Saved</div>
+              <div class="metric-value" id="valFuelSaved" style="color: var(--accent-cyan)">58.2 <span class="metric-unit">Liters</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🚗</span> Vehicle Throughput Telemetry</h2>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-title">Total Processed Vehicles</div>
+              <div class="metric-value" id="valTotalVehicles">14,280</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Emergency Preemptions</div>
+              <div class="metric-value" id="valPreemptions" style="color: var(--accent-purple)">12</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Incident Notification Modal -->
+  <div id="incidentModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🚨 Traffic Incident Detected</h3>
+        <button class="close-btn" onclick="app.closeModal()">✕</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        A vehicle collision / obstruction was logged on road segment <strong id="modalEdgeName" style="color: var(--accent-cyan);">Downtown Corridor</strong>.
+      </p>
+      <div style="background: rgba(10, 16, 28, 0.8); padding: 14px; border-radius: 8px; border: 1px solid var(--bg-card-border); margin-bottom: 20px;">
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">AI Dynamic Rerouting Plan:</div>
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent-emerald);">
+          Diversion active via Tech Ridge Expressway (-12 min delay penalty).
+        </div>
+      </div>
+      <button class="btn-primary" onclick="app.closeModal()">Acknowledge & Dispatch Response</button>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="predictionEngine.js"></script>
+  <script src="signalController.js"></script>
+  <script src="simulation.js"></script>
+  <script src="analytics.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
